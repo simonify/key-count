@@ -65,14 +65,16 @@ If a single argument is provided, it must be the `receiver` function, which is c
 
 If two or more arguments are provided, `arguments[0...arguments.length - 1]` will be flattened to create the `Path` and the last argument will be treated as the `receiver` function.
 
-The module module exports four event type constants:
+The `subscribe` function will return an `unsubscribe` function that can be called to cancel the subscription.
+
+The module exports four event type constants:
 
 * `ADD` - A key has been added to a Path (key's value became `1`).
 * `REMOVE` - A key has been removed from a Path (key's value became `0`).
 * `INCREASE` - A key's value has been increased.
 * `REMOVE` - A key's value has decreased.
 
-Each event is dispatched in the following shape:
+Each event dispatched has the following shape:
 ```js
 { type: String, payload: { path: Array, key: String, count: Number } }
 ```
