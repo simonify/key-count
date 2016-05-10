@@ -72,8 +72,8 @@ The module exports four event type constants:
 
 * `ADD` - A key has been added to a Path (key's value became `1`).
 * `REMOVE` - A key has been removed from a Path (key's value became `0`).
-* `INCREASE` - A key's value has been increased.
-* `REMOVE` - A key's value has decreased.
+* `INCREMENT` - A key's value has been increased.
+* `DECREMENT` - A key's value has decreased.
 
 Each event dispatched has the following shape:
 ```js
