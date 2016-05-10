@@ -18,8 +18,7 @@ npm install key-count --save
 import keyCount, { ADD, REMOVE } from 'key-count';
 
 const presence = keyCount();
-
-presence.subscribe(['users'], ({ type, payload }) => {
+const unsubscribe = presence.subscribe(['users'], ({ type, payload }) => {
   if (type === ADD) {
     console.log(payload.key, 'came online');
   } else if (type === REMOVE) {
@@ -34,6 +33,8 @@ presence.getCount(['users']); // 1
 presence.getCount(['users', 'simon']); // 2
 presence.decrement(['users', 'simon']); // 1
 presence.decrement(['users', 'simon']); // 0 - "simon went offline"
+
+unsubscribe();
 ```
 
 ## API
