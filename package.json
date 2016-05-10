@@ -45,7 +45,16 @@
   "bugs": {
     "url": "https://github.com/simonify/key-count/issues"
   },
-  "keywords": [],
+  "keywords": [
+    "count",
+    "key",
+    "presence",
+    "total",
+    "totals",
+    "functional",
+    "es6",
+    "babel"
+  ],
   "author": "Simon Fletcher <simon@wakecodesleep.com> (http://wakecodesleep.com)",
   "license": "MIT",
   "dependencies": {

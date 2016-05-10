@@ -62,11 +62,11 @@ presence.increment(['users', 'simon']);
 
 The `subscribe` function can either be called with a single argument or two or more arguments.
 
-If a single argument is provided, it must be the `receiver` function, which is called when an event is dispatched.
+If a single argument is provided, it must be a `receiver` function which will be called when any event is dispatched.
 
-If two or more arguments are provided, `arguments[0...arguments.length - 1]` will be flattened to create the `Path` and the last argument will be treated as the `receiver` function.
+If two or more arguments are provided, `arguments[0...arguments.length - 1]` will be flattened to create a `Path` and the last argument will be treated as a `receiver` function. Only events which affect the Path will cause the receiver to be called. For example, if you call `subscribe('users', onChange)` then only mutations to direct children of the path will trigger the receiver (e.g. `increment('users', 'simon')`).
 
-The `subscribe` function will return an `unsubscribe` function that can be called to cancel the subscription.
+The `subscribe` function will return an `unsubscribe` function which can be called to cancel the subscription.
 
 The module exports four event type constants:
 
