@@ -174,6 +174,26 @@ describe('key-count', () => {
     });
   });
 
+  describe('#remove', () => {
+    it('should set the count to 0 for the path provided', () => {
+      const instance = keyCount();
+
+      instance.increment(['a', 'deep', 'path']);
+      instance.increment(['a', 'nested', 'path']);
+      expect(instance.getCount(['a'])).toBe(2);
+      expect(instance.getCount(['a', 'deep'])).toBe(1);
+      expect(instance.getCount(['a', 'deep', 'path'])).toBe(1);
+      expect(instance.getCount(['a', 'nested'])).toBe(1);
+      expect(instance.getCount(['a', 'nested', 'path'])).toBe(1);
+      instance.remove(['a', 'deep', 'path']);
+      expect(instance.getCount(['a'])).toBe(1);
+      expect(instance.getCount(['a', 'deep'])).toBe(0);
+      expect(instance.getCount(['a', 'deep', 'path'])).toBe(0);
+      expect(instance.getCount(['a', 'nested'])).toBe(1);
+      expect(instance.getCount(['a', 'nested', 'path'])).toBe(1);
+    });
+  });
+
   describe('event behaviour', () => {
     it(`should dispatch ${ADD} and ${INCREMENT} events when adding a new root key`, () => {
       const spy = createSpy();

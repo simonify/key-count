@@ -48,6 +48,7 @@ The module exports a default function `keyCount` which can be used to create a `
   getCount: (Path) => Number,
   subscribe: (Path, receiver:Function) => unsubscribe:Function
   subscribe: (receiver:Function) => unsubscribe:Function
+  remove: (Path) => Boolean
 }
 ```
 

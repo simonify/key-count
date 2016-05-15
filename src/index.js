@@ -74,6 +74,39 @@ export default function keyCount() {
     }
   }
 
+  function remove(...paths) {
+    const path = flatten(paths);
+
+    let newState = state;
+    let farthestPath = path;
+
+    for (let i = path.length - 1; i > 0; i--) {
+      const pathToFragment = path.slice(0, i);
+      const totalValue = newState.getIn([...pathToFragment, TOTAL]);
+
+      if (totalValue > 1) {
+        break;
+      }
+
+      farthestPath = pathToFragment;
+
+      const parentPath = pathToFragment.slice(0, -1);
+
+      dispatch({ type: DECREMENT, payload: { path: parentPath, key: path[i - 1], count: 0 } });
+      dispatch({ type: REMOVE, payload: { path: parentPath, key: path[i - 1], count: 0 } });
+    }
+
+    if (farthestPath) {
+      const totalPath = [...farthestPath.slice(0, -1), TOTAL];
+      newState = newState.setIn(totalPath, newState.getIn(totalPath) - 1);
+      newState = newState.deleteIn(farthestPath);
+    }
+
+    state = newState;
+
+    return true;
+  }
+
   function increment(...paths) {
     const path = flatten(paths);
     const events = [];
@@ -165,54 +198,34 @@ export default function keyCount() {
     const pathToKey = path.slice(0, path.length - 1);
     const key = path[path.length - 1];
 
-    events.push([DECREMENT, {
-      path: pathToKey,
-      count: newValue,
-      key
-    }]);
-
-    if (value === 1) {
-      events.push([REMOVE, {
+    dispatch({
+      type: DECREMENT,
+      payload: {
         path: pathToKey,
         count: newValue,
         key
-      }]);
+      }
+    });
 
-      let farthestPath = path;
-
-      for (let i = path.length - 1; i > 0; i--) {
-        const pathToFragment = path.slice(0, i);
-        const totalValue = newState.getIn([...pathToFragment, TOTAL]);
-
-        if (totalValue > 1) {
-          break;
+    if (value === 1) {
+      dispatch({
+        type: REMOVE,
+        payload: {
+          path: pathToKey,
+          count: newValue,
+          key
         }
+      });
 
-        farthestPath = pathToFragment;
-
-        const parentPath = pathToFragment.slice(0, -1);
-
-        events.push([DECREMENT, { path: parentPath, key: path[i - 1], count: 0 }]);
-        events.push([REMOVE, { path: parentPath, key: path[i - 1], count: 0 }]);
-      }
-
-      if (farthestPath) {
-        const totalPath = [...farthestPath.slice(0, -1), TOTAL];
-        newState = newState.setIn(totalPath, newState.getIn(totalPath) - 1);
-        newState = newState.deleteIn(farthestPath);
-      }
+      setState(newState);
+      remove(path);
     } else {
       newState = newState.setIn(path, newValue);
-    }
-
-    setState(newState);
-
-    for (const [type, payload] of events) {
-      dispatch({ type, payload });
+      setState(newState);
     }
 
     return newValue;
   }
 
-  return { decrement, getCount, getState, increment, subscribe };
+  return { decrement, getCount, getState, increment, subscribe, remove };
 }
