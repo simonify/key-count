@@ -77,12 +77,11 @@ export default function keyCount() {
   function remove(...paths) {
     const path = flatten(paths);
 
-    let newState = state;
     let farthestPath = path;
 
     for (let i = path.length - 1; i > 0; i--) {
       const pathToFragment = path.slice(0, i);
-      const totalValue = newState.getIn([...pathToFragment, TOTAL]);
+      const totalValue = state.getIn([...pathToFragment, TOTAL]);
 
       if (totalValue > 1) {
         break;
@@ -96,13 +95,9 @@ export default function keyCount() {
       dispatch({ type: REMOVE, payload: { path: parentPath, key: path[i - 1], count: 0 } });
     }
 
-    if (farthestPath) {
-      const totalPath = [...farthestPath.slice(0, -1), TOTAL];
-      newState = newState.setIn(totalPath, newState.getIn(totalPath) - 1);
-      newState = newState.deleteIn(farthestPath);
-    }
-
-    state = newState;
+    const totalPath = [...farthestPath.slice(0, -1), TOTAL];
+    state = state.setIn(totalPath, state.getIn(totalPath) - 1);
+    state = state.deleteIn(farthestPath);
 
     return true;
   }
