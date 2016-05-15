@@ -180,11 +180,7 @@ export default function keyCount() {
 
   function decrement(...paths) {
     const path = flatten(paths);
-    const events = [];
-
-    let newState = state;
-
-    const value = newState.getIn(path);
+    const value = state.getIn(path);
 
     if (typeof value === 'undefined') {
       return 0;
@@ -207,6 +203,8 @@ export default function keyCount() {
       }
     });
 
+    let newState = state;
+
     if (value === 1) {
       dispatch({
         type: REMOVE,
@@ -227,5 +225,5 @@ export default function keyCount() {
     return newValue;
   }
 
-  return { decrement, getCount, getState, increment, subscribe, remove };
+  return { decrement, getCount, getState, increment, remove, subscribe };
 }
