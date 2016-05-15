@@ -43,11 +43,11 @@ The module exports a default function `keyCount` which can be used to create a `
 
 ```js
 {
-  decrement: (Path) => Number
+  decrement: (Path) => Number,
   getCount: (Path) => Number,
   increment: (Path) => Number,
-  remove: (Path) => Boolean
-  subscribe: (Path, receiver:Function) => unsubscribe:Function
+  remove: (Path) => Boolean,
+  subscribe: (Path, receiver:Function) => unsubscribe:Function,
   subscribe: (receiver:Function) => unsubscribe:Function
 }
 ```
