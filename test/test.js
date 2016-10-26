@@ -147,6 +147,15 @@ describe('key-count', () => {
       expect(instance.decrement(...path)).toBe(0);
       expect(instance.getCount(path)).toBe(0);
     });
+
+    it('should return the correct count of a parent path', () => {
+      const instance = keyCount();
+      const path = ['path', 'to'];
+      expect(instance.getCount(path)).toBe(0);
+      expect(instance.increment(...path, 'a')).toBe(1);
+      expect(instance.increment(...path, 'b')).toBe(1);
+      expect(instance.getCount(path)).toBe(2);
+    });
   });
 
   describe('#getState', () => {

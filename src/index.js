@@ -9,9 +9,13 @@ export const TOTAL = 'key-count/TOTAL';
 
 export const ASSIGN_NESTED_TO_NUMBER = 'trying to assign a nested value to a single count';
 export const ASSIGN_NUMBER_TO_NESTED = 'trying to assign a single value to a nested count';
+export const ACCESS_NESTED_AS_NUMBER = 'trying to access a nested value as a single count';
+export const ACCESS_NUMBER_AS_NESTED = 'trying to access a single count as a nested value';
 
 function flatten(arr) {
-  return arr.reduce((a, b) => a.concat(Array.isArray(b) ? flatten(b) : b), []);
+  return arr.reduce((a, b) => (
+    a.concat(Array.isArray(b) ? flatten(b) : b)
+  ), []).filter((v) => typeof v === 'string');
 }
 
 export default function keyCount() {
@@ -53,6 +57,7 @@ export default function keyCount() {
 
   function setState(newState) {
     state = newState;
+    return state;
   }
 
   function getCount(...paths) {
@@ -72,6 +77,30 @@ export default function keyCount() {
       default:
         return 0;
     }
+  }
+
+  const has = () => getCount() > 0;
+
+  function getKeys(...paths) {
+    const path = flatten(paths);
+    const value = state.getIn(path);
+
+    if (typeof value === 'number') {
+      throw new Error(ACCESS_NUMBER_AS_NESTED);
+    }
+
+    if (typeof value !== 'object') {
+      return [];
+    }
+
+    const keys = value.keySeq().toJS();
+
+    if (keys.length) {
+      keys.shift();
+      return keys;
+    }
+
+    return [];
   }
 
   function remove(...paths) {
@@ -96,20 +125,26 @@ export default function keyCount() {
     }
 
     const totalPath = [...farthestPath.slice(0, -1), TOTAL];
+
     state = state.setIn(totalPath, state.getIn(totalPath) - 1);
     state = state.deleteIn(farthestPath);
 
     return true;
   }
 
-  function increment(...paths) {
+  function increment(amount, ...paths) {
+    if (typeof amount !== 'number') {
+      paths.unshift(amount);
+      amount = 1;
+    }
+
     const path = flatten(paths);
     const events = [];
-
     const pathToKey = [...path];
     const key = pathToKey.pop();
 
     let newState = state;
+
 
     for (let i = 0; i < pathToKey.length; i++) {
       const pathToFragment = pathToKey.slice(0, i);
@@ -144,13 +179,15 @@ export default function keyCount() {
 
     const value = newState.getIn(path);
 
+
     if (typeof value === 'object') {
       throw new Error(ASSIGN_NUMBER_TO_NESTED);
     }
 
     if (typeof value === 'undefined') {
       newState = newState.setIn(path, 0);
-      newState = newState.setIn([...path.slice(0, path.length - 1), TOTAL], 1);
+      const totalKeyPath = [...path.slice(0, path.length - 1), TOTAL];
+      newState = newState.setIn(totalKeyPath, newState.getIn(totalKeyPath) + 1);
       events.push([ADD, {
         key,
         count: 1,
@@ -158,7 +195,7 @@ export default function keyCount() {
       }]);
     }
 
-    const count = newState.getIn(path) + 1;
+    const count = newState.getIn(path) + amount;
 
     newState = newState.setIn(path, count);
 
@@ -173,7 +210,12 @@ export default function keyCount() {
     return count;
   }
 
-  function decrement(...paths) {
+  function decrement(amount, ...paths) {
+    if (typeof amount !== 'number') {
+      paths.unshift(amount);
+      amount = 1;
+    }
+
     const path = flatten(paths);
     const value = state.getIn(path);
 
@@ -185,7 +227,7 @@ export default function keyCount() {
       throw new Error(ASSIGN_NUMBER_TO_NESTED);
     }
 
-    const newValue = value - 1;
+    const newValue = Math.max(0, value - amount);
     const pathToKey = path.slice(0, path.length - 1);
     const key = path[path.length - 1];
 
@@ -198,9 +240,7 @@ export default function keyCount() {
       }
     });
 
-    let newState = state;
-
-    if (value === 1) {
+    if (newValue === 0) {
       dispatch({
         type: REMOVE,
         payload: {
@@ -210,15 +250,16 @@ export default function keyCount() {
         }
       });
 
-      setState(newState);
       remove(path);
-    } else {
-      newState = newState.setIn(path, newValue);
-      setState(newState);
+      setState(state);
+
+      return 0;
     }
+
+    setState(state.setIn(path, newValue));
 
     return newValue;
   }
 
-  return { decrement, getCount, getState, increment, remove, subscribe };
+  return { decrement, getCount, getKeys, getState, has, increment, remove, subscribe };
 }
