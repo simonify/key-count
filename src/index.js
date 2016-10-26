@@ -15,7 +15,7 @@ export const ACCESS_NUMBER_AS_NESTED = 'trying to access a single count as a nes
 function flatten(arr) {
   return arr.reduce((a, b) => (
     a.concat(Array.isArray(b) ? flatten(b) : b)
-  ), []).filter((v) => typeof v === 'string');
+  ), []).filter(v => typeof v === 'string');
 }
 
 export default function keyCount() {
@@ -39,16 +39,14 @@ export default function keyCount() {
   }
 
   function subscribe(...args) {
-    const createReceiver = (receiver) => (channel, event) => receiver(event);
-
     if (typeof args[1] === 'undefined') {
-      return _subscribe(createReceiver(args[0]));
+      return _subscribe(args[0]);
     }
 
     const receiver = args.pop();
     const path = flatten(args);
 
-    return _subscribe(JSON.stringify(path), createReceiver(receiver));
+    return _subscribe(JSON.stringify(path), receiver);
   }
 
   function getState() {
@@ -108,7 +106,7 @@ export default function keyCount() {
 
     let farthestPath = path;
 
-    for (let i = path.length - 1; i > 0; i--) {
+    for (let i = path.length - 1; i > 0; i -= 1) {
       const pathToFragment = path.slice(0, i);
       const totalValue = state.getIn([...pathToFragment, TOTAL]);
 
@@ -145,8 +143,7 @@ export default function keyCount() {
 
     let newState = state;
 
-
-    for (let i = 0; i < pathToKey.length; i++) {
+    for (let i = 0; i < pathToKey.length; i += 1) {
       const pathToFragment = pathToKey.slice(0, i);
       const fragment = pathToKey[i];
       const fragmentPath = [...pathToFragment, fragment];
@@ -179,7 +176,6 @@ export default function keyCount() {
 
     const value = newState.getIn(path);
 
-
     if (typeof value === 'object') {
       throw new Error(ASSIGN_NUMBER_TO_NESTED);
     }
@@ -203,9 +199,7 @@ export default function keyCount() {
 
     setState(newState);
 
-    for (const [type, payload] of events) {
-      dispatch({ type, payload });
-    }
+    events.forEach(([type, payload]) => dispatch({ type, payload }));
 
     return count;
   }
