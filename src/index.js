@@ -87,18 +87,11 @@ export default function keyCount() {
       throw new Error(ACCESS_NUMBER_AS_NESTED);
     }
 
-    if (typeof value !== 'object') {
+    if (typeof value !== 'object' || value.size === 0) {
       return [];
     }
 
-    const keys = value.keySeq().toJS();
-
-    if (keys.length) {
-      keys.shift();
-      return keys;
-    }
-
-    return [];
+    return value.remove(TOTAL).keySeq().toJS();
   }
 
   function remove(...paths) {
